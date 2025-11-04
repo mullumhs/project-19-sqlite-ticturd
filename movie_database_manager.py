@@ -59,13 +59,21 @@ def delete_movie(conn, title):
     cursor.execute('''
     DELETE FROM movies
     WHERE title = ?
-    ''', (title))
+    ''', (title, ))
     
     conn.commit()
 
 def find_movies_by_director(conn, director):
-    # TODO: Find and display all movies by a specific director
-    pass
+    cursor = conn.cursor()
+    cursor.execute('''
+    SELECT * FROM movies 
+    WHERE director = ?
+    ''', (director, ))
+    movies_by_director = cursor.fetchall()
+    print(f"Movies by {director}:")
+    for movie in movies_by_director:
+        print(movie)
+
 
 
 def main():
