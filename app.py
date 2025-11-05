@@ -1,34 +1,44 @@
+from flask import Flask, render_template, request, redirect, url_for
 import sqlite3
 
 
-conn = sqlite3.connect('movies.db')
-cursor = conn.cursor()
+app = Flask(__name__)
 
 
-# Create the movies table
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS movies (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    director TEXT,
-    year INTEGER,
-    rating FLOAT
-)
-''')
+def get_db_connection():
+    conn = sqlite3.connect('my_movie_collection.db')
+    return conn
 
-#Insert movies into movies table
-movies = [
-    ('The Shawshank Redemption', 'Frank Darabont', 1994, 9.3),
-    ('Inception', 'Christopher Nolan', 2010, 8.8),
-    ('The Matrix', 'Lana and Lilly Wachowski', 1999, 8.7),
-    ('Interstellar', 'Christopher Nolan', 2014, 8.6)
-]
 
-cursor.executemany('''
-INSERT INTO movies (title, director, year, rating)
-VALUES (?, ?, ?, ?)
-''', movies)
+@app.route('/')
+def index():
+    conn = get_db_connection()
+    movies = conn.execute('SELECT * FROM movies').fetchall()
+    conn.close()
+    return render_template('index.html', movies=movies)
 
-# Commit the changes and close the connection
-conn.commit()
-conn.close()
+
+@app.route('/add', methods=['GET', 'POST'])
+def add_movie():
+    # On a form submission (POST)
+    if request.method == 'POST':
+        title = request.form['title']
+        director = request.form['director']
+        year = int(request.form['year'])
+        rating = float(request.form['rating'])
+        
+
+        conn = get_db_connection()
+        conn.execute('INSERT INTO movies (title, director, year, rating) VALUES (?, ?, ?, ?)',
+                     (title, director, year, rating))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('index'))
+
+    
+    # On visiting the page (GET)
+    return render_template('add.html')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
