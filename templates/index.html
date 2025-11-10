@@ -8,8 +8,7 @@
 <body>
     <h1>Movies in Database</h1>
     {% for movie in movies %}
-        <li>{{ movie }}</li>
+        <li>{{ movie.title }} | {{ movie.director }} | {{ movie.year }} | {{ movie.rating }}</li>
     {% endfor %}
-
 
 </html>
